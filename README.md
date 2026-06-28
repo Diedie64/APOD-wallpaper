@@ -23,11 +23,9 @@ The script is designed to:
 
 - `Set-APODWallpaper.ps1` → main script
 
-The script uses these local folders:
-- Script + log + run-state:
+The script uses this local folder:
+- Script + log + run-state + downloaded images:
   - `C:\APOD`
-- Downloaded images:
-  - `C:\Users\diede\AppData\Local\APOD-Wallpaper\images`
 
 ---
 
@@ -71,6 +69,12 @@ Check the log:
 
 ```powershell
 Get-Content "C:\APOD\apod.log" -Tail 80
+```
+
+Check downloaded files:
+
+```powershell
+Get-ChildItem "C:\APOD" | Sort-Object LastWriteTime -Descending | Select-Object -First 10 Name,LastWriteTime,Length
 ```
 
 If needed, force a re-run on the same day:
@@ -122,7 +126,14 @@ Delete:
 Then run script again.
 
 ### Wallpaper not changing
-- Verify image download exists in:
-  - `C:\Users\diede\AppData\Local\APOD-Wallpaper\images`
+- Verify the image file exists in:
+  - `C:\APOD`
 - Check log:
   - `C:\APOD\apod.log`
+
+---
+
+## 9) Security Recommendation
+
+Do not commit your real API key to public repositories.  
+For public repos, keep the placeholder in code and store your real key only locally.
