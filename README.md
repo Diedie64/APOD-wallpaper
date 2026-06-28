@@ -1,2 +1,135 @@
-# APOD-wallpaper
-This repository contains a script that changes your Windows desktop background to the Astronomy Picture of the Day. 
+# APOD Wallpaper (Windows)
+
+This repository contains a PowerShell script that sets your Windows desktop wallpaper to NASA's **Astronomy Picture of the Day (APOD)**.
+
+The script is designed to:
+- run once per day (first login/start of the day),
+- download the APOD image,
+- set it as wallpaper with **Fit** mode (full image visible, no distortion),
+- skip APOD entries that are videos or GIFs (keep previous wallpaper),
+- log all actions to a log file.
+
+---
+
+## 1) Requirements
+
+- Windows 10/11
+- PowerShell 5.1 or newer
+- Internet connection
+
+---
+
+## 2) Repository Files
+
+- `Set-APODWallpaper.ps1` → main script
+
+The script uses these local folders:
+- Script + log + run-state:
+  - `C:\APOD`
+- Downloaded images:
+  - `C:\Users\diede\AppData\Local\APOD-Wallpaper\images`
+
+---
+
+## 3) Get a NASA API Key
+
+1. Open: https://api.nasa.gov/
+2. Click **Generate API Key** (or equivalent sign-up option).
+3. Fill in the required info and submit.
+4. Copy your API key.
+
+---
+
+## 4) Add API Key to the Script
+
+Open `Set-APODWallpaper.ps1` and replace:
+
+```powershell
+$ApiKey = 'YOUR_NASA_API_KEY_HERE'
+```
+
+with your real key, for example:
+
+```powershell
+$ApiKey = 'abc123...'
+```
+
+Save the file.
+
+---
+
+## 5) First Manual Test Run
+
+Open PowerShell and run:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\APOD\Set-APODWallpaper.ps1"
+```
+
+Check the log:
+
+```powershell
+Get-Content "C:\APOD\apod.log" -Tail 80
+```
+
+If needed, force a re-run on the same day:
+
+```powershell
+Remove-Item "C:\APOD\last_run.txt" -ErrorAction SilentlyContinue
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\APOD\Set-APODWallpaper.ps1"
+```
+
+---
+
+## 6) Run Automatically at Login (Daily)
+
+Create a scheduled task:
+
+```powershell
+$taskName = "APOD Daily Wallpaper"
+$script   = "C:\APOD\Set-APODWallpaper.ps1"
+
+$action   = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
+$trigger  = New-ScheduledTaskTrigger -AtLogOn
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
+
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Description "Set NASA APOD as wallpaper once per day"
+```
+
+The task runs on every logon, but the script itself ensures it only performs one update per day.
+
+---
+
+## 7) Behavior Notes
+
+- If APOD is a **video** (`media_type != image`), wallpaper is not changed.
+- If APOD image is a **GIF**, wallpaper is not changed.
+- On API/network errors (e.g. HTTP 503), the script retries automatically.
+- If your personal API call fails, it tries `DEMO_KEY` as a fallback.
+
+---
+
+## 8) Troubleshooting
+
+### HTTP 503 / Server Unavailable
+This is usually temporary on NASA's side.  
+The script already retries automatically. Run again later if needed.
+
+### "Script already ran today"
+Delete:
+- `C:\APOD\last_run.txt`
+Then run script again.
+
+### Wallpaper not changing
+- Verify image download exists in:
+  - `C:\Users\diede\AppData\Local\APOD-Wallpaper\images`
+- Check log:
+  - `C:\APOD\apod.log`
+
+---
+
+## 9) Security Recommendation
+
+Do not commit your real API key to public repositories.  
+For public repos, keep the placeholder in code and store your real key only locally.
