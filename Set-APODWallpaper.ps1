@@ -1,4 +1,3 @@
-#requires -version 5.1
 $ErrorActionPreference = 'Stop'
 
 # ===== Config =====
