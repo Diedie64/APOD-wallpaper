@@ -86,23 +86,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "C:\APOD\Set-APODWallpaper.p
 
 ---
 
-## 6) Run Automatically at Login (Daily)
+## 6) Run Automatically at Login
 
 Create a scheduled task:
 
 ```powershell
 $taskName = "APOD Daily Wallpaper"
-$script   = "C:\APOD\Set-APODWallpaper.ps1"
+$script   = "C:\APOD\APOD.ps1"
 
 $action   = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
 $trigger  = New-ScheduledTaskTrigger -AtLogOn
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
 
-Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Description "Set NASA APOD as wallpaper once per day"
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Description "Set NASA APOD as wallpaper at logon"
 ```
 
-The task runs on every logon, but the script itself ensures it only performs one update per day.
-
+This task runs at every logon.
 ---
 
 ## 7) Behavior Notes
