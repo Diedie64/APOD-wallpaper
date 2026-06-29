@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $ScriptRoot    = 'C:\APOD'
 $LogFile       = Join-Path $ScriptRoot 'apod.log'
 $StateFile     = Join-Path $ScriptRoot 'last_run.txt'
-$ImagesFolder  = 'C:\Users\diede\AppData\Local\APOD-Wallpaper\images'
+$ImagesFolder  = 'C:\APOD'   # Images are saved directly in C:\APOD
 
 # Add your NASA API key here:
 $ApiKey        = 'YOUR_NASA_API_KEY_HERE'
@@ -78,9 +78,9 @@ try {
     New-Item -ItemType Directory -Path $ImagesFolder -Force | Out-Null
     if (-not (Test-Path $LogFile)) { New-Item -ItemType File -Path $LogFile -Force | Out-Null }
 
+    # CHANGED: no early exit anymore
     if (Test-AlreadyRanToday) {
-        Write-Log "Script already ran today. Exiting."
-        exit 0
+        Write-Log "Script already ran today, but continuing because a re-run may be needed."
     }
 
     Write-Log "Starting APOD update via NASA API."
